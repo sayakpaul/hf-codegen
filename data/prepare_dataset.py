@@ -4,9 +4,19 @@ from nbformat import reads, NO_CONVERT
 from tqdm import tqdm
 from datasets import Dataset
 from typing import Dict
+from multiprocessing import Pool
 
 MIRROR_DIRECTORY = "hf_public_repos"
 DATASET_ID = "hf-codegen"
+
+# Block the following formats.
+IMAGE = ["png", "jpg", "jpeg", "gif"]
+VIDEO = ["mp4", "jfif"]
+DOC = ["key", "PDF", "pdf", "docx", "xlsx"]
+AUDIO = ["flac", "ogg", "mid", "webm"]
+ARCHIVE = ["jar", "aar", "gz"]
+OTHERS = ["npy", "index", "inv", "index", "DS_Store", "rdb", "pack", "idx"]
+ANTI_FOMATS = tuple(IMAGE + VIDEO + DOC + AUDIO + ARCHIVE + OTHERS)
 
 
 def filter_code_cell(cell) -> bool:
@@ -19,7 +29,7 @@ def filter_code_cell(cell) -> bool:
         return True
 
 
-def process_file(file_path: str) -> Dict[str, str]:
+def process_file(directory_name: str, file_path: str) -> Dict[str, str]:
     """Processes a single file."""
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -43,7 +53,7 @@ def process_file(file_path: str) -> Dict[str, str]:
         content = ""
 
     return {
-        "repo_id": os.path.dirname(file_path),
+        "repo_id": directory_name,
         "file_path": file_path,
         "content": content,
     }
@@ -52,23 +62,26 @@ def process_file(file_path: str) -> Dict[str, str]:
 def read_repository_files(directory) -> pd.DataFrame:
     """Reads the files from the locally cloned repositories."""
     file_paths = []
-    df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
+    pd.DataFrame(columns=["repo_id", "file_path", "content"])
 
     # Recursively find all files within the directory
     for root, _, files in os.walk(directory):
         for file in files:
-            file_paths.append(os.path.join(root, file))
+            file_path = os.path.join(root, file)
+            if not file_path.endswith(ANTI_FOMATS) and ".git" not in file_path:
+                file_paths.append((os.path.dirname(root), file_path))
 
     # Process files using multiprocessing
     print(f"Total file paths: {len(file_paths)}.")
     print("Reading file contents...")
-    for file_path in tqdm(file_paths):
-        file_content = process_file(file_path)
-        if file_content["content"] != "":
-            temp_df = pd.DataFrame.from_dict([file_content])
-            df = pd.concat([df, temp_df])
 
-    return df
+    with Pool() as pool, tqdm(total=len(file_paths)) as pbar:
+        results = []
+        for result in pool.starmap(process_file, file_paths):
+            results.append(result)
+            pbar.update(1)
+
+    return pd.DataFrame(results)
 
 
 if __name__ == "__main__":

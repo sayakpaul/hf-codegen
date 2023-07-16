@@ -59,7 +59,8 @@ def read_repository_files(directory):
     # Recursively find all files within the directory
     for root, _, files in os.walk(directory):
         for file in files:
-            file_paths.append(os.path.join(root, file))
+            file_path = os.path.join(root, file)
+            file_paths.append((directory, file_path))
 
     # Process files using multiprocessing
     print(f"Total file paths: {len(file_paths)}.")

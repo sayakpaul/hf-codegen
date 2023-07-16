@@ -3,6 +3,7 @@ import pandas as pd
 from nbformat import reads, NO_CONVERT
 from multiprocessing import Pool
 from datasets import Dataset
+import codecs
 
 MIRROR_DIRECTORY = "hf_public_repos"
 DATASET_ID = "hf-codegen"
@@ -19,8 +20,7 @@ def filter_code_cell(cell):
 
 
 def process_file(file_path):
-    with open(file_path, "r", encoding="utf-8") as file:
-        print(f"From process_file: {file_path}")
+    with codecs.open(file_path, "r", encoding="utf-8", errors="ignore") as file:
         content = file.read()
         if file_path.endswith("ipynb"):
             try:

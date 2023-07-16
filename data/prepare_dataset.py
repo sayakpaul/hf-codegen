@@ -1,14 +1,15 @@
 import os
 import pandas as pd
 from nbformat import reads, NO_CONVERT
-from multiprocessing import Pool
+from tqdm import tqdm
 from datasets import Dataset
+from typing import Dict
 
 MIRROR_DIRECTORY = "hf_public_repos"
 DATASET_ID = "hf-codegen"
 
 
-def filter_code_cell(cell):
+def filter_code_cell(cell) -> bool:
     """Filters a code cell w.r.t shell commands, etc."""
     only_shell = cell["source"].startswith("!")
     only_magic = "%%capture" in cell["source"]
@@ -18,7 +19,7 @@ def filter_code_cell(cell):
         return True
 
 
-def process_file(file_path):
+def process_file(file_path: str) -> Dict[str, str]:
     with open(file_path, "r", encoding="utf-8") as file:
         try:
             content = file.read()
@@ -41,14 +42,15 @@ def process_file(file_path):
             content = ""
 
     return {
-        "directory_name": os.path.dirname(file_path),
-        "filepath": file_path,
+        "repo_id": os.path.dirname(file_path),
+        "file_path": file_path,
         "content": content,
     }
 
 
-def read_repository_files(directory):
+def read_repository_files(directory) -> pd.DataFrame:
     file_paths = []
+    df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
 
     # Recursively find all files within the directory
     for root, _, files in os.walk(directory):
@@ -57,10 +59,14 @@ def read_repository_files(directory):
 
     # Process files using multiprocessing
     print(f"Total file paths: {len(file_paths)}.")
-    with Pool() as pool:
-        results = pool.map(process_file, file_paths)
+    print("Reading file contents...")
+    for file_path in tqdm(file_paths):
+        file_content = process_file(file_path)
+        if file_content["content"] != "":
+            temp_df = pd.DataFrame.from_dict([file_content])
+            df = pd.concat([df, temp_df])
 
-    return pd.DataFrame(results)
+    return df
 
 
 if __name__ == "__main__":

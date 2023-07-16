@@ -4,7 +4,6 @@ from nbformat import reads, NO_CONVERT
 from tqdm import tqdm
 from datasets import Dataset
 from typing import Dict
-from multiprocessing import Pool
 
 MIRROR_DIRECTORY = "hf_public_repos"
 DATASET_ID = "hf-codegen"
@@ -62,7 +61,7 @@ def process_file(directory_name: str, file_path: str) -> Dict[str, str]:
 def read_repository_files(directory) -> pd.DataFrame:
     """Reads the files from the locally cloned repositories."""
     file_paths = []
-    pd.DataFrame(columns=["repo_id", "file_path", "content"])
+    df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
 
     # Recursively find all files within the directory
     for root, _, files in os.walk(directory):
@@ -75,13 +74,13 @@ def read_repository_files(directory) -> pd.DataFrame:
     print(f"Total file paths: {len(file_paths)}.")
     print("Reading file contents...")
 
-    with Pool() as pool, tqdm(total=len(file_paths)) as pbar:
-        results = []
-        for result in pool.starmap(process_file, file_paths):
-            results.append(result)
-            pbar.update(1)
+    for file_path in tqdm(file_paths):
+        file_content = process_file(file_path)
+        if file_content["content"] != "":
+            temp_df = pd.DataFrame.from_dict([file_content])
+            df = pd.concat([df, temp_df])
 
-    return pd.DataFrame(results)
+    return df
 
 
 if __name__ == "__main__":

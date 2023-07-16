@@ -20,6 +20,7 @@ def filter_code_cell(cell):
 
 def process_file(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
+        print(f"From process_file: {file_path}")
         content = file.read()
         if file_path.endswith("ipynb"):
             try:

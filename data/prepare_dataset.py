@@ -20,6 +20,7 @@ def filter_code_cell(cell) -> bool:
 
 
 def process_file(file_path: str) -> Dict[str, str]:
+    """Processes a single file."""
     with open(file_path, "r", encoding="utf-8") as file:
         try:
             content = file.read()
@@ -49,6 +50,7 @@ def process_file(file_path: str) -> Dict[str, str]:
 
 
 def read_repository_files(directory) -> pd.DataFrame:
+    """Reads the files from the locally cloned repositories."""
     file_paths = []
     df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
 

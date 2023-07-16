@@ -27,6 +27,7 @@ def get_repos(username, access_token=None, include_fork=False):
 
 
 def mirror_repository(repository):
+    """Locally clones a repository."""
     repository_url = f"https://github.com/{ORG}/{repository}.git"
     repository_path = os.path.join(MIRROR_DIRECTORY, repository)
 

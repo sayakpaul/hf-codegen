@@ -1,5 +1,4 @@
 datasets
-pygit2
 PyGithub
 nbformat
 pandas

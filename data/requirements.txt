@@ -1,3 +1,4 @@
 datasets
 pygit2
 PyGithub
+pandas

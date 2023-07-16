@@ -21,7 +21,7 @@ def get_repos(username, access_token=None, include_fork=False):
             results.append(repo)
         else:
             if include_fork is True:
-                results.append(repo)
+                results.append(repo.name)
 
     return results
 

@@ -21,8 +21,8 @@ def filter_code_cell(cell) -> bool:
 
 def process_file(file_path: str) -> Dict[str, str]:
     """Processes a single file."""
-    with open(file_path, "r", encoding="utf-8") as file:
-        try:
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
             if file_path.endswith("ipynb"):
                 # Code courtesy: Chansung Park and Sayak Paul.
@@ -39,8 +39,8 @@ def process_file(file_path: str) -> Dict[str, str]:
                 for cell in code_cells:
                     code_cell_str += cell["source"]
                 content = code_cell_str
-        except Exception:
-            content = ""
+    except Exception:
+        content = ""
 
     return {
         "repo_id": os.path.dirname(file_path),

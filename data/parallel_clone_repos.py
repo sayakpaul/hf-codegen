@@ -18,7 +18,7 @@ def get_repos(username, access_token=None, include_fork=False):
     results = []
     for repo in user.get_repos():
         if repo.fork is False:
-            results.append(repo)
+            results.append(repo.name)
         else:
             if include_fork is True:
                 results.append(repo.name)

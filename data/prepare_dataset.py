@@ -74,8 +74,8 @@ def read_repository_files(directory) -> pd.DataFrame:
     print(f"Total file paths: {len(file_paths)}.")
     print("Reading file contents...")
 
-    for file_path in tqdm(file_paths):
-        file_content = process_file(file_path)
+    for directory_name, file_path in tqdm(file_paths):
+        file_content = process_file(directory_name, file_path)
         if file_content["content"] != "":
             temp_df = pd.DataFrame.from_dict([file_content])
             df = pd.concat([df, temp_df])

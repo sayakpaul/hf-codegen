@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from nbformat import reads, NO_CONVERT
+import pygit2
 from multiprocessing import Pool
 from datasets import Dataset
 
@@ -19,31 +20,36 @@ def filter_code_cell(cell):
 
 
 def process_file(file_path):
-    with open(file_path, "r", encoding="utf-8") as file:
-        content = file.read()
-        if file_path.endswith("ipynb"):
-            try:
-                # Code courtesy: Chansung Park and Sayak Paul.
-                code_cell_str = ""
-                notebook = reads(content, NO_CONVERT)
+    repository_path, relative_path = file_path
+    repository = pygit2.Repository(repository_path)
+    commit = repository.head.target
 
-                code_cells = [
-                    c
-                    for c in notebook["cells"]
-                    if c["cell_type"] == "code"
-                    if filter_code_cell(c)
-                ]
+    try:
+        blob = repository[commit.tree_id / relative_path]
+        content = blob.data.decode("utf-8")
+        if relative_path.endswith("ipynb"):
+            code_cell_str = ""
+            notebook = reads(content, NO_CONVERT)
 
-                for cell in code_cells:
-                    code_cell_str += cell["source"]
-                content = code_cell_str
-            except Exception:
-                pass
+            code_cells = [
+                c
+                for c in notebook["cells"]
+                if c["cell_type"] == "code"
+                if filter_code_cell(c)
+            ]
+
+            for cell in code_cells:
+                code_cell_str += cell["source"]
+            content = code_cell_str
+    
+    except (KeyError, pygit2.GitError):
+        # Handle cases where the file is not found or cannot be read
+        content = ""
 
     return {
         "directory_name": os.path.dirname(file_path),
         "filepath": file_path,
-        "content": content,
+        "content": content
     }
 
 

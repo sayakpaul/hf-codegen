@@ -67,10 +67,12 @@ def read_repository_files(directory) -> pd.DataFrame:
     for root, _, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
-            if not file_path.endswith(ANTI_FOMATS) and ".git" not in file_path:
+            if not file_path.endswith(ANTI_FOMATS) and all(
+                k not in file_path for k in [".git", "__pycache__"]
+            ):
                 file_paths.append((os.path.dirname(root), file_path))
 
-    # Process files using multiprocessing
+    # Process files sequentially.
     print(f"Total file paths: {len(file_paths)}.")
     print("Reading file contents...")
 

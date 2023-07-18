@@ -89,6 +89,7 @@ def read_repository_files(directory) -> pd.DataFrame:
     """Reads the files from the locally cloned repositories."""
     file_paths = []
     df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
+    chunk_flag = 0
 
     # Recursively find all files within the directory
     for root, _, files in os.walk(directory):
@@ -110,11 +111,16 @@ def read_repository_files(directory) -> pd.DataFrame:
             temp_df = pd.DataFrame.from_dict([file_content])
             df = pd.concat([df, temp_df])
 
-            if SERIALIZE_IN_CHUNKS and ((i + 1) % SERIALIZE_IN_CHUNKS == 0):
-                df_path = f"df_chunk_{i+1}_{len(df)}.csv"
-                print("Serializing dataframe to {df_path}...")
+            if (
+                SERIALIZE_IN_CHUNKS
+                and len(df) != 0
+                and (len(df) % SERIALIZE_IN_CHUNKS == 0)
+            ):
+                df_path = f"df_chunk_{chunk_flag}_{len(df)}.csv"
+                print(f"Serializing dataframe to {df_path}...")
                 df.to_csv(df_path, index=False)
                 df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
+                chunk_flag += 1
 
     return df
 

@@ -105,12 +105,17 @@ def read_repository_files(directory) -> pd.DataFrame:
 
     for i, (directory_name, file_path) in enumerate(tqdm(file_paths)):
         file_content = process_file(directory_name, file_path)
+
         if file_content["content"] != "":
             temp_df = pd.DataFrame.from_dict([file_content])
             df = pd.concat([df, temp_df])
+
             if SERIALIZE_IN_CHUNKS and ((i + 1) % SERIALIZE_IN_CHUNKS == 0):
-                df.to_csv(f"df_chunk_{i+1}_{len(df)}", index=False)
+                df_path = f"df_chunk_{i+1}_{len(df)}.csv"
+                print("Serializing dataframe to {df_path}...")
+                df.to_csv(df_path, index=False)
                 df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
+
     return df
 
 

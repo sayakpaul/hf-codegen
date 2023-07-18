@@ -119,6 +119,7 @@ def read_repository_files(directory) -> pd.DataFrame:
                 df_path = f"df_chunk_{chunk_flag}_{len(df)}.csv"
                 print(f"Serializing dataframe to {df_path}...")
                 df.to_csv(df_path, index=False)
+                del df
                 df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
                 chunk_flag += 1
 

@@ -7,7 +7,7 @@ from typing import Dict
 
 MIRROR_DIRECTORY = "hf_public_repos"
 DATASET_ID = "hf-codegen"
-SERIALIZE_IN_CHUNKS = 50000
+SERIALIZE_IN_CHUNKS = 10000
 
 # Block the following formats.
 IMAGE = ["png", "jpg", "jpeg", "gif"]
@@ -55,7 +55,7 @@ def filter_code_cell(cell) -> bool:
         return True
 
 
-def process_file(repo_id: str, file_path: str) -> Dict[str, str]:
+def process_file(directory_name: str, file_path: str) -> Dict[str, str]:
     """Processes a single file."""
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -79,7 +79,7 @@ def process_file(repo_id: str, file_path: str) -> Dict[str, str]:
         content = ""
 
     return {
-        "repo_id": repo_id,
+        "repo_id": directory_name,
         "file_path": file_path,
         "content": content,
     }
@@ -98,8 +98,7 @@ def read_repository_files(directory) -> pd.DataFrame:
             if not file_path.endswith(ANTI_FOMATS) and all(
                 k not in file_path for k in [".git", "__pycache__", "xcodeproj"]
             ):
-                repo_id = file_path.split("/")[1]
-                file_paths.append((repo_id, file_path))
+                file_paths.append((os.path.dirname(root), file_path))
 
     # Process files sequentially.
     print(f"Total file paths: {len(file_paths)}.")
@@ -117,9 +116,9 @@ def read_repository_files(directory) -> pd.DataFrame:
                 and len(df) != 0
                 and (len(df) % SERIALIZE_IN_CHUNKS == 0)
             ):
-                df_path = f"df_chunk_{chunk_flag}_{len(df)}.csv"
+                df_path = f"df_chunk_{chunk_flag}_{len(df)}.ftr"
                 print(f"Serializing dataframe to {df_path}...")
-                df.to_csv(df_path, index=False)
+                df.to_feather(df_path)
                 del df
                 df = pd.DataFrame(columns=["repo_id", "file_path", "content"])
                 chunk_flag += 1

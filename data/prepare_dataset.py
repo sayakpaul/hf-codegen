@@ -4,10 +4,14 @@ from nbformat import reads, NO_CONVERT
 from tqdm import tqdm
 from datasets import Dataset
 from typing import Dict
+from huggingface_hub import HfApi, create_repo
+import tempfile
+import subprocess
 
 MIRROR_DIRECTORY = "hf_public_repos"
 DATASET_ID = "hf-codegen"
 SERIALIZE_IN_CHUNKS = 10000
+FEATHER_FORMAT = "ftr"
 
 # Block the following formats.
 IMAGE = ["png", "jpg", "jpeg", "gif"]
@@ -43,6 +47,19 @@ OTHERS = [
     "opus",
 ]
 ANTI_FOMATS = tuple(IMAGE + VIDEO + DOC + AUDIO + ARCHIVE + OTHERS)
+
+
+def upload_to_hub(file_format: str, repo_id: str):
+    """Moves all the files matching `file_format` to a folder and
+    uploads the folder to the Hugging Face Hub."""
+    api = HfApi()
+    repo_id = create_repo(repo_id=repo_id, exist_ok=True, repo_type="dataset").repo_id
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        os.makedirs(tmpdirname)
+        command = f"mv *.{file_format} {tmpdirname}"
+        _ = subprocess.run(command.split())
+        api.upload_folder(repo_id=repo_id, folder_path=tmpdirname, repo_type="dataset")
 
 
 def filter_code_cell(cell) -> bool:
@@ -116,7 +133,7 @@ def read_repository_files(directory) -> pd.DataFrame:
                 and len(df) != 0
                 and (len(df) % SERIALIZE_IN_CHUNKS == 0)
             ):
-                df_path = f"df_chunk_{chunk_flag}_{len(df)}.ftr"
+                df_path = f"df_chunk_{chunk_flag}_{len(df)}.{FEATHER_FORMAT}"
                 print(f"Serializing dataframe to {df_path}...")
                 df.reset_index().to_feather(df_path)
                 del df
@@ -129,6 +146,8 @@ def read_repository_files(directory) -> pd.DataFrame:
 if __name__ == "__main__":
     df = read_repository_files(MIRROR_DIRECTORY)
     print("DataFrame created, creating dataset...")
+    upload_to_hub(file_format=FEATHER_FORMAT, repo_id=DATASET_ID)
+    print(f"{FEATHER_FORMAT} files uploaded to the Hub.")
     if not SERIALIZE_IN_CHUNKS:
         dataset = Dataset.from_pandas(df)
         dataset.push_to_hub(DATASET_ID, private=True)

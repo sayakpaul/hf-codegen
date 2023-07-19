@@ -11,7 +11,7 @@ Make sure you have at least 50 GB of disk space.
 
 Initially, we tried to also parallelize the reading and processing of code contents using `multiprocessing` but couldn't succeed in doing so. The memory was getting overhauled. 
 
-So, we decided to process each repository file (in total we have 115 repositories) sequentially. The utility returns a dictionary which we were appending to a `pandas` dataframe, which was initialized to be empty just containing columns. Our plan was to construct a final big `pandas` dataframe and serialize that.
+So, we decided to process each repository file (in total we have 115 repositories) sequentially. [The utility](https://github.com/sayakpaul/hf-codegen/blob/c43da62dd95bd8ac1950bfc8e5c0cedbaf8d67a2/data/prepare_dataset.py#L75) returns a dictionary which we were appending to a `pandas` dataframe, which was initialized to be empty just containing columns. Our plan was to construct a final big `pandas` dataframe and serialize that.
 
 This was failing to execute in full capacity as the memory was overhauling in this case too. 
 

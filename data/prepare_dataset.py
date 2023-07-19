@@ -55,7 +55,7 @@ def filter_code_cell(cell) -> bool:
         return True
 
 
-def process_file(directory_name: str, file_path: str) -> Dict[str, str]:
+def process_file(repo_id: str, file_path: str) -> Dict[str, str]:
     """Processes a single file."""
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -79,7 +79,7 @@ def process_file(directory_name: str, file_path: str) -> Dict[str, str]:
         content = ""
 
     return {
-        "repo_id": directory_name,
+        "repo_id": repo_id,
         "file_path": file_path,
         "content": content,
     }
@@ -98,7 +98,8 @@ def read_repository_files(directory) -> pd.DataFrame:
             if not file_path.endswith(ANTI_FOMATS) and all(
                 k not in file_path for k in [".git", "__pycache__", "xcodeproj"]
             ):
-                file_paths.append((os.path.dirname(root), file_path))
+                repo_id = file_path.split("/")[1]
+                file_paths.append((repo_id, file_path))
 
     # Process files sequentially.
     print(f"Total file paths: {len(file_paths)}.")

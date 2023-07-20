@@ -1,4 +1,3 @@
 datasets
-PyGithub
 nbformat
 pandas

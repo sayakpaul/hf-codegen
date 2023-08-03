@@ -1,6 +1,6 @@
 # hf-codegen
 
-A repository containing Python scripts for collating code files from the public repositories of `huggingface` on GitHub. 
+A repository containing Python scripts for collating code content from the public repositories of `huggingface` on GitHub. 
 
 Resultant dataset: https://huggingface.co/datasets/sayakpaul/hf-codegen-v2. 
 

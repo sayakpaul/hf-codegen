@@ -15,7 +15,7 @@ Make sure you have at least 50 GB of disk space.
 5. Prepare the dataset, serialize in feather files, and upload them to the Hugging Face Hub: `python prepare_dataset.py`.
 6. To finally have the dataset compatible with 🤗 Datasets (helps with downstream training), run `python push_to_hub.py`.
 
-💡 Note that Step 5 was run on a separate machine with lots of RAM (240 GB). Steps 4 - 5 could have been clubbed together had we used a more capable machine from the get-go. 
+💡 Note that Step 6 was run on a separate machine with lots of RAM (240 GB). Steps 5 - 6 could have been clubbed together had we used a more capable machine from the get-go. 
 
 The final dataset can be found here: [sayakpaul/hf-codegen-v2](https://hf.co/datasets/sayakpaul/hf-codegen-v2).
 

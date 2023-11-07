@@ -4,7 +4,7 @@ A repository containing Python scripts for collating code content from the publi
 
 Resultant dataset: https://huggingface.co/datasets/sayakpaul/hf-codegen-v2. 
 
-**Update**: [Sourab](https://github.com/pacman100) and I published a blog post utilizing a part of this dataset to train a custom coding assistant. While I focused on data collection efforts, Sourab led the rest of the project, running numerous experiments. Check out our blog post here: P[ersonal Copilot: Train Your Own Coding Assistant](https://huggingface.co/blog/personal-copilot).
+**Update**: [Sourab](https://github.com/pacman100) and I published a blog post utilizing a part of this dataset to train a custom coding assistant. While I focused on data collection efforts, Sourab led the rest of the project, running numerous experiments. Check out our blog post here: [Personal Copilot: Train Your Own Coding Assistant](https://huggingface.co/blog/personal-copilot).
 
 ## To generate the dataset 
 

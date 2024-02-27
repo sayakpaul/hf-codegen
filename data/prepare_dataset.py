@@ -4,7 +4,7 @@ from nbformat import reads, NO_CONVERT
 from tqdm import tqdm
 from datasets import Dataset
 from typing import Dict
-from huggingface_hub import HfApi, create_repo
+from huggingface_hub import create_repo, upload_folder
 import tempfile
 import subprocess
 
@@ -52,14 +52,13 @@ ANTI_FOMATS = tuple(IMAGE + VIDEO + DOC + AUDIO + ARCHIVE + OTHERS)
 def upload_to_hub(file_format: str, repo_id: str):
     """Moves all the files matching `file_format` to a folder and
     uploads the folder to the Hugging Face Hub."""
-    api = HfApi()
     repo_id = create_repo(repo_id=repo_id, exist_ok=True, repo_type="dataset").repo_id
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         os.makedirs(tmpdirname)
         command = f"mv *.{file_format} {tmpdirname}"
         _ = subprocess.run(command.split())
-        api.upload_folder(repo_id=repo_id, folder_path=tmpdirname, repo_type="dataset")
+        upload_folder(repo_id=repo_id, folder_path=tmpdirname, repo_type="dataset")
 
 
 def filter_code_cell(cell) -> bool:
@@ -150,4 +149,4 @@ if __name__ == "__main__":
     print(f"{FEATHER_FORMAT} files uploaded to the Hub.")
     if not SERIALIZE_IN_CHUNKS:
         dataset = Dataset.from_pandas(df)
-        dataset.push_to_hub(DATASET_ID, private=True)
+        dataset.push_to_hub(DATASET_ID)
